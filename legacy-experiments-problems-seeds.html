@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>فايب كودر مع جميناي - Vibe Coder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #0f172a; /* Slate 900 */
+            color: #f8fafc;
+        }
+        .glow-text {
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #38bdf8; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #0284c7; }
+        
+        .loader {
+            border: 4px solid #1e293b;
+            border-top: 4px solid #38bdf8;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 10px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center py-10 px-4">
+
+    <header class="text-center mb-10 w-full max-w-4xl relative">
+        <div class="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 blur-[50px] opacity-20 -z-10 rounded-full"></div>
+        <h1 class="text-5xl font-black mb-2 leading-relaxed">
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-indigo-400 glow-text py-2">فايب كودر</span> 
+            <span class="text-white text-3xl font-bold align-middle drop-shadow-md">مع جميناي</span>
+        </h1>
+        <p class="text-slate-400 text-lg">محرك الأتمتة البرمجية: فكرة ← تخطيط (برومبت) ← كود كامل ← تحميل</p>
+    </header>
+
+    <main class="w-full max-w-4xl flex flex-col gap-6">
+        
+        <!-- API Key Section -->
+        <div class="glass-panel rounded-2xl p-6 shadow-2xl border-l-4 border-l-rose-500">
+            <h2 class="text-xl font-bold mb-2 text-rose-400"><i class="fas fa-key ml-2"></i> إعدادات الاتصال (API Key)</h2>
+            <p class="text-xs text-slate-400 mb-4">لضمان أمان حصتك، يرجى إدخال مفتاح Gemini API الخاص بك هنا. (لا يتم حفظ المفتاح في أي خادم).</p>
+            <input type="password" id="apiKeyInput" class="w-full bg-slate-800 text-white font-mono rounded-xl p-3 border border-slate-600 focus:border-rose-400 focus:outline-none transition" placeholder="الصق مفتاح API الخاص بك هنا (AIzaSy...)">
+        </div>
+
+        <!-- Idea / File Upload Section -->
+        <div class="glass-panel rounded-2xl p-6 shadow-2xl">
+            <h2 class="text-xl font-bold mb-4 text-sky-400"><i class="fas fa-lightbulb ml-2"></i> 1. الفكرة أو الكود الحالي</h2>
+            
+            <textarea id="ideaInput" rows="3" class="w-full bg-slate-800 text-white rounded-xl p-4 mb-4 border border-slate-600 focus:border-sky-400 focus:outline-none transition resize-none" placeholder="اكتب فكرتك البرمجية هنا... (مثال: اصنع لي آلة حاسبة علمية بتصميم نيون)"></textarea>
+            
+            <div class="flex items-center gap-4">
+                <label class="cursor-pointer bg-slate-700 hover:bg-slate-600 text-white py-2 px-4 rounded-lg transition text-sm flex items-center gap-2">
+                    <i class="fas fa-file-upload"></i> رفع ملف (HTML/JS/CSS/TXT)
+                    <input type="file" id="fileInput" class="hidden" accept=".html,.js,.css,.txt">
+                </label>
+                <span id="fileNameDisplay" class="text-sm text-slate-400 hidden">تم رفع الملف بنجاح ✓</span>
+            </div>
+        </div>
+
+        <!-- AI Prompt Generator Section (Editable) -->
+        <div class="glass-panel rounded-2xl p-6 shadow-2xl relative transition-all duration-500 border-l-4 border-l-indigo-500" id="promptSection">
+            <h2 class="text-xl font-bold mb-4 text-indigo-400"><i class="fas fa-robot ml-2"></i> 2. التخطيط الذاتي (البرومبت)</h2>
+            <p class="text-xs text-slate-400 mb-2">هنا يكتب الذكاء الاصطناعي الأوامر لنفسه. يمكنك التعديل عليها قبل التنفيذ.</p>
+            <textarea id="aiPromptEditor" rows="6" class="w-full bg-slate-900 text-green-400 font-mono text-sm rounded-xl p-4 border border-slate-700 focus:border-indigo-400 focus:outline-none transition resize-y shadow-inner" placeholder="سيظهر هنا البرومبت المُولد تلقائياً لتعديله..."></textarea>
+        </div>
+
+        <!-- Action Button -->
+        <div class="flex justify-center my-4 relative">
+            <button id="mainActionButton" onclick="handleMainAction()" class="bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-bold py-4 px-10 rounded-full shadow-[0_0_20px_rgba(56,189,248,0.4)] hover:shadow-[0_0_30px_rgba(56,189,248,0.6)] transition-all transform hover:scale-105 text-xl flex items-center gap-3">
+                <span id="btnText">توليد برومبت التخطيط</span>
+                <i id="btnIcon" class="fas fa-magic"></i>
+                <div id="loader" class="loader hidden"></div>
+            </button>
+        </div>
+
+        <!-- Code Output Status Section -->
+        <div class="glass-panel rounded-2xl p-6 shadow-2xl hidden border-r-4 border-r-emerald-500" id="statusSection">
+            <h2 class="text-xl font-bold mb-2 text-emerald-400"><i class="fas fa-check-circle ml-2"></i> حالة الكود</h2>
+            <p id="statusMessage" class="text-slate-300">تم توليد الكود وتحميله كملف HTML.</p>
+            <p class="text-xs text-slate-500 mt-2">الكود الحالي محفوظ في الذاكرة لتطويره في الدورة القادمة.</p>
+        </div>
+
+    </main>
+
+    <script>
+        // State Management
+        let currentPhase = 'idle'; // 'idle' -> 'prompt_ready' -> 'code_generated'
+        let currentCodeContext = ''; // Holds the uploaded or generated code
+        
+        // DOM Elements
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const ideaInput = document.getElementById('ideaInput');
+        const fileInput = document.getElementById('fileInput');
+        const fileNameDisplay = document.getElementById('fileNameDisplay');
+        const aiPromptEditor = document.getElementById('aiPromptEditor');
+        const mainActionButton = document.getElementById('mainActionButton');
+        const btnText = document.getElementById('btnText');
+        const btnIcon = document.getElementById('btnIcon');
+        const loader = document.getElementById('loader');
+        const statusSection = document.getElementById('statusSection');
+        const statusMessage = document.getElementById('statusMessage');
+
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentCodeContext = e.target.result;
+                    fileNameDisplay.textContent = `تم رفع الملف: ${file.name} ✓`;
+                    fileNameDisplay.classList.remove('hidden');
+                    ideaInput.placeholder = "تم رفع كود. اكتب هنا ما تريد تعديله أو تطويره على هذا الكود...";
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        async function callGeminiAPI(systemInstruction, userPrompt) {
+            const apiKey = apiKeyInput.value.trim();
+            if (!apiKey) {
+                alert("يرجى إدخال مفتاح Gemini API الخاص بك في الخانة المخصصة بالأعلى للبدء.");
+                return null;
+            }
+
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+            
+            const payload = {
+                contents: [{ parts: [{ text: userPrompt }] }],
+                systemInstruction: { parts: [{ text: systemInstruction }] },
+                generationConfig: { temperature: 0.7 }
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error('Network response was not ok');
+                const result = await response.json();
+                
+                if (result.candidates && result.candidates[0].content.parts[0].text) {
+                    return result.candidates[0].content.parts[0].text;
+                } else {
+                    throw new Error('Unexpected API response structure');
+                }
+            } catch (error) {
+                console.error("API Error:", error);
+                alert("حدث خطأ أثناء الاتصال بالذكاء الاصطناعي. يرجى المحاولة مرة أخرى.");
+                return null;
+            }
+        }
+
+        function downloadHTMLFile(codeContent, filename = "vibe_coder_output.html") {
+            const blob = new Blob([codeContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        async function handleMainAction() {
+            // Disable button and show loader
+            mainActionButton.disabled = true;
+            btnText.classList.add('opacity-50');
+            loader.classList.remove('hidden');
+            btnIcon.classList.add('hidden');
+
+            if (currentPhase === 'idle' || currentPhase === 'code_generated') {
+                // PHASE 1: GENERATE PROMPT
+                await generatePromptForAI();
+            } else if (currentPhase === 'prompt_ready') {
+                // PHASE 2: GENERATE CODE & DOWNLOAD
+                await generateCodeFromPrompt();
+            }
+
+            // Restore button
+            mainActionButton.disabled = false;
+            btnText.classList.remove('opacity-50');
+            loader.classList.add('hidden');
+            btnIcon.classList.remove('hidden');
+        }
+
+        async function generatePromptForAI() {
+            const userIdea = ideaInput.value.trim();
+            if (!userIdea && !currentCodeContext) {
+                alert("يرجى كتابة فكرة أو رفع ملف للبدء.");
+                return;
+            }
+
+            btnText.textContent = "جاري التفكير وكتابة البرومبت...";
+
+            const sysInstruction = `أنت مهندس برمجيات رئيسي (Tech Lead) ومدير جودة. مهمتك هي كتابة 'برومبت' (أمر تلقين) مفصل جداً وصارم لتوجيه مبرمج ذكاء اصطناعي آخر لإنتاج كود HTML.
+            
+قواعد كتابة البرومبت الخاص بك:
+1. يجب أن يكون البرومبت باللغة العربية الواضحة.
+2. اطلب صراحة من المبرمج كتابة **الكود كاملاً** من البداية للنهاية في ملف واحد (HTML+CSS+JS). حذره من إعطاء أجزاء أو مقتطفات.
+3. إذا كان هناك كود سابق، اطلب منه اكتشاف الأخطاء وتصليحها، وتنفيذ التطويرات المطلوبة.
+4. **قانون صارم:** اطلب منه صراحة الاحتفاظ بأي مفاتيح API (API Keys) أو بيانات قاعدة بيانات (Database Credentials) موجودة في الكود السابق كما هي تماماً دون أي مساس بها أو وضع علامات (placeholders) مكانها.
+5. اجعل البرومبت عملي، تقني، ويوجه لكتابة كود نظيف وتفاعلي.`;
+
+            let userQuery = `المطلوب من المستخدم: ${userIdea}\n`;
+            if (currentCodeContext) {
+                userQuery += `\nالكود الحالي الموجود في الذاكرة (للتعديل واكتشاف الأخطاء):\n\`\`\`html\n${currentCodeContext}\n\`\`\``;
+            }
+
+            const generatedPrompt = await callGeminiAPI(sysInstruction, userQuery);
+            
+            if (generatedPrompt) {
+                aiPromptEditor.value = generatedPrompt;
+                
+                // Update UI State
+                currentPhase = 'prompt_ready';
+                btnText.textContent = "تنفيذ البرومبت وتحميل الكود";
+                btnIcon.className = "fas fa-code";
+                mainActionButton.classList.replace('from-sky-500', 'from-emerald-500');
+                mainActionButton.classList.replace('to-indigo-600', 'to-teal-600');
+                statusSection.classList.add('hidden');
+            }
+        }
+
+        async function generateCodeFromPrompt() {
+            const finalPrompt = aiPromptEditor.value.trim();
+            if (!finalPrompt) {
+                alert("البرومبت فارغ!");
+                return;
+            }
+
+            btnText.textContent = "جاري كتابة الكود...";
+
+            // The AI acting as the developer
+            const sysInstruction = `أنت مطور ويب محترف (Full-stack).
+القواعد:
+1. الرد يجب أن يكون **فقط** كود HTML كامل (يحتوي على CSS و JS داخله).
+2. لا تكتب أي نصوص، شروحات، أو مقدمات خارج الكود.
+3. إياك أن تكتب تعليقات مثل "باقي الكود هنا". يجب أن تكتب الكود من السطر الأول للأخير ليكون جاهزاً للعمل مباشرة.
+4. **قانون حتمي:** إذا وجدت في السياق أو الكود السابق أي متغيرات تحمل API Keys أو Token أو كلمات مرور، اتركها قيمتها كما هي حرفياً، إياك أن تستبدلها بـ "YOUR_API_KEY".`;
+
+            let userQuery = `قم بتنفيذ الأوامر التالية بحذافيرها:\n${finalPrompt}\n`;
+            if (currentCodeContext) {
+                 userQuery += `\nاعتمد على هذا الكود كبداية وقم بتحديثه كاملاً:\n\`\`\`html\n${currentCodeContext}\n\`\`\``;
+            }
+
+            const rawResponse = await callGeminiAPI(sysInstruction, userQuery);
+            
+            if (rawResponse) {
+                // Extract code from Markdown blocks if present
+                let cleanCode = rawResponse;
+                const codeMatch = cleanCode.match(/```(?:html|xml)?\s*([\s\S]*?)```/);
+                if (codeMatch) {
+                    cleanCode = codeMatch[1].trim();
+                }
+
+                // Update memory
+                currentCodeContext = cleanCode;
+
+                // Download File
+                downloadHTMLFile(cleanCode, `VibeCoder_App_${new Date().getTime()}.html`);
+
+                // Update UI State
+                currentPhase = 'code_generated';
+                btnText.textContent = "اكتشاف الأخطاء وتوليد برومبت التطوير";
+                btnIcon.className = "fas fa-search-plus";
+                mainActionButton.classList.replace('from-emerald-500', 'from-purple-500');
+                mainActionButton.classList.replace('to-teal-600', 'to-pink-600');
+                
+                statusSection.classList.remove('hidden');
+                ideaInput.value = ""; // Clear idea input for next cycle
+                ideaInput.placeholder = "تم حفظ الكود. هل تريد إضافة ميزة جديدة؟ (اختياري)";
+            }
+        }
+    </script>
+</body>
+</html>
